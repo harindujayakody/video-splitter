@@ -6,61 +6,45 @@
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
 ![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![Status](https://img.shields.io/badge/status-active-success)
-![Website](https://img.shields.io/badge/Website-Infiax.com-black)
 
-**Split Video Pro** is a modern terminal-based video splitting utility built with Python, Rich, FFmpeg, and FFprobe.
+Split Video Pro is a lightweight terminal utility for splitting long videos into smaller, manageable clips with real-time FFmpeg feedback.
 
-It can split a source video using either a custom clip duration or a custom number of equal parts, while displaying realtime FFmpeg processing statistics directly in the terminal.
+Built for fast workflow, clean control, and a simple command-line experience, it helps you divide a source video by duration or by a fixed number of parts without leaving the terminal.
 
-## Author
+## Why Use It?
 
-**Harindu Jayakody**  
-**Infiax.com**
-
-Website: https://infiax.com
+- Split videos into equal or custom-length segments
+- Choose a source file from a friendly terminal menu
+- Track progress live while FFmpeg encodes each clip
+- Output clean MP4 files with H.264 video and AAC audio
+- Keep your workflow simple and script-friendly
 
 ---
 
 ## Features
 
-- Modern terminal UI powered by `rich`
-- Automatically scans the `input` folder
-- Lets you select a source video when multiple files are available
-- Split by **clip duration**
-- Split by **number of parts**
-- Realtime FFmpeg progress dashboard
-- Overall percentage
-- Current clip number
-- Current clip processed time
-- FFmpeg frame count
-- Realtime FPS
-- Encoding speed
-- Current bitrate
-- Total data written
-- Total elapsed time
-- Estimated remaining time
-- Current output filename
-- Displays source duration, file size, resolution, and codecs
-- Automatically creates output folders
-- H.264 video output
-- AAC audio output
-- MP4 output for broad compatibility
-- Windows `.bat` launcher
-- Automatic Python dependency installation from `requirements.txt`
-- Automatic FFmpeg / FFprobe detection
-- Windows launcher can attempt FFmpeg installation through `winget`
+- Modern terminal interface powered by `rich`
+- Auto-scans the `input` folder for supported video files
+- Lets you select a video when multiple sources are present
+- Split by custom clip duration
+- Split by total number of parts
+- Live FFmpeg stats dashboard
+- Current clip, elapsed time, FPS, bitrate, and ETA
+- Automatic output folder generation
+- H.264 + AAC MP4 export for broad compatibility
+- Windows launcher script support
+- Dependency checks for Python and FFmpeg
 - Keyboard interrupt handling
-- GitHub-ready project structure
 
 ---
 
 ## Supported Input Formats
 
-Split Video Pro currently scans for these common video extensions:
+The app automatically detects common video extensions such as:
 
 `MP4`, `MKV`, `MOV`, `AVI`, `WEBM`, `M4V`, `FLV`, `WMV`, `TS`, `MTS`, `M2TS`, `MPG`, and `MPEG`.
 
-FFmpeg itself may support additional formats, but the extensions above are the formats automatically detected by the current script.
+FFmpeg may support more formats than the list above, but these are the extensions actively scanned by the current script.
 
 ---
 
@@ -79,7 +63,7 @@ Split-Video-Pro/
     └── Generated clips are saved here
 ```
 
-Each source video gets its own output directory.
+Each source video gets its own output folder.
 
 Example:
 
@@ -100,9 +84,9 @@ output/
 
 ### Python
 
-Python **3.9 or newer** is recommended.
+Python 3.9 or newer is recommended.
 
-Check your Python version:
+Check your version:
 
 ```bash
 python --version
@@ -112,7 +96,7 @@ python --version
 
 Both `ffmpeg` and `ffprobe` must be available in your system `PATH`.
 
-Check them with:
+Verify with:
 
 ```bash
 ffmpeg -version
@@ -121,50 +105,42 @@ ffprobe -version
 
 ### Python Package
 
-The current Python dependency is:
-
-```text
-rich>=13.7.0,<15.0.0
-```
-
-Install dependencies manually with:
+Install the required dependency:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
+Current package requirement:
+
+```text
+rich>=13.7.0,<15.0.0
+```
+
 ---
 
-## Windows Quick Start
+## Quick Start
 
-The recommended Windows method is the included launcher.
+### Windows
 
-1. Download or clone the project.
-2. Put your video files inside the `input` folder.
-3. Double-click:
+Double-click the launcher:
 
 ```text
 Split Video Pro.bat
 ```
 
-The launcher automatically performs these checks:
+The launcher can:
 
-1. Detect Python.
-2. Detect `pip`.
-3. Attempt to install `pip` if necessary.
-4. Install/check Python packages from `requirements.txt`.
-5. Detect FFmpeg and FFprobe.
-6. If FFmpeg is missing and `winget` is available, attempt to install `Gyan.FFmpeg`.
-7. Create `input` and `output` folders if needed.
-8. Start `split_video_pro.py`.
+1. Detect Python
+2. Check `pip`
+3. Install requirements if needed
+4. Verify FFmpeg and FFprobe
+5. Create missing `input` and `output` folders
+6. Launch the app
 
-If FFmpeg is installed during the first launcher run, Windows may require you to close the terminal and launch `Split Video Pro.bat` again so the updated `PATH` is visible.
+### Manual Start
 
----
-
-## Manual Start
-
-Install Python dependencies:
+Install dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -176,7 +152,7 @@ Then run:
 python split_video_pro.py
 ```
 
-On Linux or macOS you may need:
+On Linux or macOS:
 
 ```bash
 python3 split_video_pro.py
@@ -184,36 +160,21 @@ python3 split_video_pro.py
 
 ---
 
-## How To Use
+## How to Use
 
-Put one or more videos inside:
-
-```text
-/input
-```
-
-Start Split Video Pro.
-
-If multiple source videos exist, select the video number from the terminal list.
-
-The application then displays source information such as:
-
-- duration
-- file size
-- resolution
-- video codec
-- audio codec
-
-Choose a split mode:
+1. Place one or more supported videos in the `input` folder.
+2. Start the application.
+3. Select the desired source video if multiple are available.
+4. Choose a split mode:
 
 ```text
 1  By clip duration
 2  By number of parts
 ```
 
-### Split By Duration
+### Split by Duration
 
-Accepted duration examples:
+Examples:
 
 ```text
 30
@@ -224,7 +185,7 @@ Accepted duration examples:
 00:05:00
 ```
 
-Meaning:
+These values represent:
 
 - `30` = 30 seconds
 - `30s` = 30 seconds
@@ -233,11 +194,9 @@ Meaning:
 - `01:30` = 1 minute 30 seconds
 - `00:05:00` = 5 minutes
 
-If the source duration is not evenly divisible by the requested duration, the final clip can be shorter.
+### Split by Number of Parts
 
-### Split By Number Of Parts
-
-Enter the total number of clips you want.
+Enter how many clips you want to generate.
 
 Example:
 
@@ -245,35 +204,35 @@ Example:
 10
 ```
 
-Split Video Pro calculates the approximate duration of each part automatically.
+The program calculates the appropriate segment length automatically.
 
 ---
 
-## Realtime Terminal Stats
+## Live Terminal Stats
 
-While FFmpeg is processing, Split Video Pro displays a live terminal dashboard.
+While FFmpeg is processing, Split Video Pro shows a live dashboard with:
 
 | Stat | Description |
 |---|---|
-| Overall | Total video splitting progress |
-| Current clip | Current clip number / total clip count |
-| Clip progress | Processed duration inside the current clip |
-| Frame | Current encoded frame reported by FFmpeg |
-| FPS | Current encoding frames per second |
-| Encoding speed | FFmpeg processing speed such as `1.8x` |
-| Bitrate | Current FFmpeg output bitrate |
-| Written | Approximate total output data written |
-| Elapsed | Total wall-clock processing time |
-| ETA | Estimated remaining processing time |
-| Output file | File currently being created |
+| Overall | Total splitting progress |
+| Current clip | Current segment number / total |
+| Clip progress | Time processed in the current clip |
+| Frame | Current encoded frame count |
+| FPS | Current processing rate |
+| Encoding speed | FFmpeg speed multiplier |
+| Bitrate | Output bitrate in use |
+| Written | Approximate total output written |
+| Elapsed | Total processing time |
+| ETA | Estimated remaining time |
+| Output file | File currently being generated |
 
-Realtime values come from FFmpeg's machine-readable progress output and can fluctuate during encoding.
+These values are reported directly by FFmpeg and may fluctuate depending on the source and machine speed.
 
 ---
 
-## Output Encoding
+## Output Settings
 
-The current output settings prioritize compatibility and quality:
+The video output is optimized for compatibility and quality:
 
 ```text
 Container : MP4
@@ -284,21 +243,13 @@ Audio     : AAC
 Audio rate: 192 kbps
 ```
 
-Because Split Video Pro re-encodes clips, split boundaries are more accurate than basic stream-copy splitting.
-
-Re-encoding performance depends on factors such as:
-
-- source resolution
-- source duration
-- CPU performance
-- source codec
-- number of generated clips
+Because clips are re-encoded, split boundaries are typically more precise than stream-copy splitting.
 
 ---
 
 ## Output Location
 
-Generated clips are written to:
+Generated clips are stored in:
 
 ```text
 /output/<source-video-name>/
@@ -310,36 +261,7 @@ Example:
 /output/my_video/my_video_part_01.mp4
 ```
 
-Existing generated files with the same names are overwritten by FFmpeg.
-
----
-
-## GitHub Installation
-
-Clone your repository:
-
-```bash
-git clone <YOUR-GITHUB-REPOSITORY-URL>
-cd Split-Video-Pro
-```
-
-Install dependencies:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-Put videos in `input/`, then run:
-
-```bash
-python split_video_pro.py
-```
-
-Windows users can instead double-click:
-
-```text
-Split Video Pro.bat
-```
+Existing files with the same names are overwritten by FFmpeg.
 
 ---
 
@@ -354,7 +276,7 @@ ffmpeg -version
 ffprobe -version
 ```
 
-If Windows installed FFmpeg using `winget`, close your current terminal and open a new one so the updated `PATH` can load.
+If Windows installed FFmpeg with `winget`, reopen the terminal after installation so the updated `PATH` is loaded.
 
 ### Rich Module Not Found
 
@@ -366,25 +288,24 @@ python -m pip install -r requirements.txt
 
 ### No Videos Found
 
-Place a supported source video inside:
+Place supported videos inside:
 
 ```text
 input/
 ```
 
-Then restart the program.
+Then restart the app.
 
 ### Processing Failed
 
 Verify that the source file is readable and not corrupted.
 
-You can test it with:
-
-```bash
-ffprobe "input/your_video.mp4"
-```
-
 ---
+
+<footer>
+  <p>Created by Harindu Jayakody</p>
+  <p>Infiax.com</p>
+</footer>
 
 ## Notes
 

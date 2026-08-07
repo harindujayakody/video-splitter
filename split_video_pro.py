@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -198,6 +199,20 @@ def get_split_plan(total_duration: float, mode: str) -> tuple[float, int]:
         return total_duration / parts, parts
 
 
+def clear_terminal() -> None:
+    try:
+        if os.name == "nt":
+            os.system("cls")
+        else:
+            os.system("clear")
+    except Exception:
+        pass
+    try:
+        console.clear()
+    except Exception:
+        pass
+
+
 def safe_output_dir(video: Path) -> Path:
     target = OUTPUT_DIR / video.stem
     target.mkdir(parents=True, exist_ok=True)
@@ -342,6 +357,7 @@ def show_plan(video: Path, total_duration: float, clip_duration: float, parts: i
 
 
 def main() -> None:
+    clear_terminal()
     ensure_folders()
     console.print(Panel.fit(
         f"[bold cyan]{APP_NAME}[/bold cyan]\n"
