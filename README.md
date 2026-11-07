@@ -1,11 +1,11 @@
 # Split Video Pro
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)
-![FFmpeg](https://img.shields.io/badge/FFmpeg-Required-007808?logo=ffmpeg&logoColor=white)
-![Terminal UI](https://img.shields.io/badge/Terminal%20UI-Rich-8A2BE2)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FFmpeg](https://img.shields.io/badge/FFmpeg-Required-007808?logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
+[![Terminal UI](https://img.shields.io/badge/Terminal%20UI-Rich-8A2BE2)](https://github.com/Textualize/rich)
+[![License: MIT](https://img.shields.io/badge/License-MIT-A3BE8C?style=flat)](LICENSE)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
-![Status](https://img.shields.io/badge/status-active-success)
 
 Split Video Pro is a lightweight terminal utility for splitting long videos into smaller, manageable clips with real-time FFmpeg feedback.
 
@@ -13,11 +13,11 @@ Built for fast workflow, clean control, and a simple command-line experience, it
 
 ## Why Use It?
 
-- Split videos into equal or custom-length segments
-- Choose a source file from a friendly terminal menu
-- Track progress live while FFmpeg encodes each clip
-- Output clean MP4 files with H.264 video and AAC audio
-- Keep your workflow simple and script-friendly
+- **Fast Stream-Copy:** Split clips in seconds without quality loss using keyframe-based stream copy (`-c copy`).
+- **Re-encode Mode:** Frame-accurate cuts re-encoded to high-compatibility H.264 video and AAC audio.
+- **Safety First:** Prevents silent overwriting of existing output files by alerting and prompting upfront.
+- **Rich Live Dashboard:** Real-time progress bar, FPS, processing speed, ETA, and total data written.
+- **Cross-Platform:** Works seamlessly on Windows, macOS, and Linux.
 
 ---
 
@@ -25,328 +25,129 @@ Built for fast workflow, clean control, and a simple command-line experience, it
 
 - Modern terminal interface powered by `rich`
 - Auto-scans the `input` folder for supported video files
-- Lets you select a video when multiple sources are present
-- Split by custom clip duration
-- Split by total number of parts
-- Live FFmpeg stats dashboard
-- Current clip, elapsed time, FPS, bitrate, and ETA
-- Automatic output folder generation
-- H.264 + AAC MP4 export for broad compatibility
-- Windows launcher script support
-- Dependency checks for Python and FFmpeg
-- Keyboard interrupt handling
-
----
-
-## Supported Input Formats
-
-The app automatically detects common video extensions such as:
-
-`MP4`, `MKV`, `MOV`, `AVI`, `WEBM`, `M4V`, `FLV`, `WMV`, `TS`, `MTS`, `M2TS`, `MPG`, and `MPEG`.
-
-FFmpeg may support more formats than the list above, but these are the extensions actively scanned by the current script.
-
----
-
-## Project Structure
-
-```text
-Split-Video-Pro/
-├── split_video_pro.py
-├── Split Video Pro.bat
-├── requirements.txt
-├── README.md
-├── .gitignore
-├── input/
-│   └── Put source videos here
-└── output/
-    └── Generated clips are saved here
-```
-
-Each source video gets its own output folder.
-
-Example:
-
-```text
-input/
-└── holiday.mp4
-
-output/
-└── holiday/
-    ├── holiday_part_01.mp4
-    ├── holiday_part_02.mp4
-    └── holiday_part_03.mp4
-```
+- Interactive selection when multiple videos are present
+- Split by custom clip duration (e.g. `30s`, `5m`, `01:30`) or by total number of parts
+- Two splitting engines:
+  - **Stream Copy (Fast & Lossless)**: Instantaneous, keyframe-accurate cuts with no transcoding overhead
+  - **Re-encode (Slow & Exact)**: Frame-accurate cuts re-encoded to H.264 + AAC MP4
+- Overwrite protection before writing clips
+- Live FFmpeg stats dashboard (clip index, elapsed time, FPS, bitrate, and ETA)
+- Automatic output directory creation per source video
+- Windows launcher script (`Split Video Pro.bat`) with automatic dependency checks
+- Unit test suite for verification
 
 ---
 
 ## Requirements
 
-### Python
+### 1. Python
 
-Python 3.9 or newer is recommended.
+Python 3.9 or newer is required.
 
 Check your version:
-
 ```bash
 python --version
 ```
 
-### FFmpeg
+### 2. FFmpeg & FFprobe (System Requirement)
 
-Both `ffmpeg` and `ffprobe` must be available in your system `PATH`.
+Both `ffmpeg` and `ffprobe` must be installed and accessible in your system `PATH`.
 
-Verify with:
+#### Installation by OS:
 
+- **Windows:**
+  - Automated: double-click `Split Video Pro.bat` (uses `winget` if missing)
+  - Manual with winget:
+    ```powershell
+    winget install Gyan.FFmpeg
+    ```
+  - Manual with Scoop:
+    ```powershell
+    scoop install ffmpeg
+    ```
+
+- **macOS:**
+  ```bash
+  brew install ffmpeg
+  ```
+
+- **Linux (Debian / Ubuntu):**
+  ```bash
+  sudo apt update && sudo apt install -y ffmpeg
+  ```
+
+- **Linux (Fedora):**
+  ```bash
+  sudo dnf install ffmpeg
+  ```
+
+- **Linux (Arch):**
+  ```bash
+  sudo pacman -S ffmpeg
+  ```
+
+Verify the installation:
 ```bash
 ffmpeg -version
 ffprobe -version
 ```
 
-### Python Package
+### 3. Python Package
 
-Install the required dependency:
+Install the required Python package:
 
 ```bash
 python -m pip install -r requirements.txt
-```
-
-Current package requirement:
-
-```text
-rich>=13.7.0,<15.0.0
 ```
 
 ---
 
 ## Quick Start
 
-### Windows
+### Windows Launcher
 
-Double-click the launcher:
-
+Double-click:
 ```text
 Split Video Pro.bat
 ```
+The launcher will verify Python and pip, install requirements, verify FFmpeg, create `input` and `output` folders, and run the program.
 
-The launcher can:
-
-1. Detect Python
-2. Check `pip`
-3. Install requirements if needed
-4. Verify FFmpeg and FFprobe
-5. Create missing `input` and `output` folders
-6. Launch the app
-
-### Manual Start
-
-Install dependencies:
+### Manual Terminal Run
 
 ```bash
-python -m pip install -r requirements.txt
-```
-
-Then run:
-
-```bash
+# 1. Place your video in input/
+# 2. Run the script:
 python split_video_pro.py
 ```
-
-On Linux or macOS:
-
-```bash
-python3 split_video_pro.py
-```
+*(On Linux/macOS use `python3 split_video_pro.py`)*
 
 ---
 
 ## How to Use
 
-1. Place one or more supported videos in the `input` folder.
-2. Start the application.
-3. Select the desired source video if multiple are available.
-4. Choose a split mode:
-
-```text
-1  By clip duration
-2  By number of parts
-```
-
-### Split by Duration
-
-Examples:
-
-```text
-30
-30s
-5m
-1h
-01:30
-00:05:00
-```
-
-These values represent:
-
-- `30` = 30 seconds
-- `30s` = 30 seconds
-- `5m` = 5 minutes
-- `1h` = 1 hour
-- `01:30` = 1 minute 30 seconds
-- `00:05:00` = 5 minutes
-
-### Split by Number of Parts
-
-Enter how many clips you want to generate.
-
-Example:
-
-```text
-10
-```
-
-The program calculates the appropriate segment length automatically.
+1. Place one or more video files in `input/`.
+2. Start the application: `python split_video_pro.py`.
+3. Select your source video.
+4. Choose split mode:
+   - **1 — By clip duration** (e.g., `30`, `45s`, `5m`, `02:00`)
+   - **2 — By number of parts** (e.g., `4` parts)
+5. Choose processing method:
+   - **1 — Stream Copy (Fast & Lossless)**: Best for speed and preservation of original quality.
+   - **2 — Re-encode (Slow & Exact)**: Best for frame-perfect cut accuracy or converting to MP4.
+6. Review the split plan and confirm.
 
 ---
 
-## Live Terminal Stats
+## Running Unit Tests
 
-While FFmpeg is processing, Split Video Pro shows a live dashboard with:
-
-| Stat | Description |
-|---|---|
-| Overall | Total splitting progress |
-| Current clip | Current segment number / total |
-| Clip progress | Time processed in the current clip |
-| Frame | Current encoded frame count |
-| FPS | Current processing rate |
-| Encoding speed | FFmpeg speed multiplier |
-| Bitrate | Output bitrate in use |
-| Written | Approximate total output written |
-| Elapsed | Total processing time |
-| ETA | Estimated remaining time |
-| Output file | File currently being generated |
-
-These values are reported directly by FFmpeg and may fluctuate depending on the source and machine speed.
-
----
-
-## Output Settings
-
-The video output is optimized for compatibility and quality:
-
-```text
-Container : MP4
-Video     : H.264 / libx264
-Preset    : medium
-CRF       : 18
-Audio     : AAC
-Audio rate: 192 kbps
-```
-
-Because clips are re-encoded, split boundaries are typically more precise than stream-copy splitting.
-
----
-
-## Output Location
-
-Generated clips are stored in:
-
-```text
-/output/<source-video-name>/
-```
-
-Example:
-
-```text
-/output/my_video/my_video_part_01.mp4
-```
-
-Existing files with the same names are overwritten by FFmpeg.
-
----
-
-## Troubleshooting
-
-### FFmpeg / FFprobe Not Found
-
-Make sure both commands work from a terminal:
+Run the test suite with:
 
 ```bash
-ffmpeg -version
-ffprobe -version
+python -m unittest test_split_video_pro.py
 ```
-
-If Windows installed FFmpeg with `winget`, reopen the terminal after installation so the updated `PATH` is loaded.
-
-### Rich Module Not Found
-
-Run:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-### No Videos Found
-
-Place supported videos inside:
-
-```text
-input/
-```
-
-Then restart the app.
-
-### Processing Failed
-
-Verify that the source file is readable and not corrupted.
 
 ---
 
-<footer>
-  <p>Created by Harindu Jayakody</p>
-  <p>Infiax.com</p>
-</footer>
+## License
 
-## Notes
-
-- Output clips are encoded as MP4 using H.264 and AAC.
-- A source containing no audio can still be processed.
-- The program maps the first available video stream and first available audio stream.
-- Metadata is copied where FFmpeg can preserve it.
-- The final duration-based clip may be shorter than the requested duration.
-- Realtime ETA is an estimate and changes as encoding speed changes.
-- Large or high-resolution videos can require significant CPU time and disk space.
-
----
-
-## Contributing
-
-Issues, feature ideas, UI improvements, performance improvements, and pull requests are welcome after the project is published on GitHub.
-
-Possible future improvements:
-
-- stream-copy / fast split mode
-- hardware acceleration
-- custom output codec selection
-- output quality presets
-- drag-and-drop support
-- batch processing
-- subtitle stream handling
-- audio-only splitting
-- configurable filename templates
-
----
-
-## Credits
-
-Built with:
-
-- Python
-- Rich
-- FFmpeg
-- FFprobe
-
-Developed by **Harindu Jayakody**  
-**Infiax.com**
-
-https://infiax.com
+[MIT](LICENSE) © 2026 Harindu Jayakody. Free to use, modify, and distribute.
