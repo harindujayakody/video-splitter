@@ -1,1 +1,8 @@
+# Python Dependencies
 rich>=13.7.0,<15.0.0
+
+# System Requirement (external binary, not installable via pip):
+# FFmpeg and FFprobe must be installed and available in PATH.
+# - Windows: winget install Gyan.FFmpeg (or use "Split Video Pro.bat" launcher)
+# - macOS:   brew install ffmpeg
+# - Linux:   sudo apt update && sudo apt install -y ffmpeg

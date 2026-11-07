@@ -34,7 +34,7 @@ except ImportError:
     sys.exit(1)
 
 APP_NAME = "Split Video Pro"
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 AUTHOR = "Harindu Jayakody"
 WEBSITE = "Infiax.com"
 
@@ -175,6 +175,17 @@ def choose_mode() -> str:
     return "duration" if choice == "1" else "parts"
 
 
+def choose_processing_method() -> str:
+    console.print(Panel.fit(
+        "[bold]Select processing method:[/bold]\n\n"
+        "[cyan]1[/cyan]  [bold]Stream Copy (Fast & Lossless)[/bold] — Near-instant, keyframe cuts, no re-encoding\n"
+        "[cyan]2[/cyan]  [bold]Re-encode (Slow & Exact)[/bold] — Frame-accurate cuts, re-encodes to H.264 + AAC MP4",
+        title="Processing Method", border_style="cyan",
+    ))
+    choice = Prompt.ask("Choose method", choices=["1", "2"], default="1")
+    return "copy" if choice == "1" else "reencode"
+
+
 def get_split_plan(total_duration: float, mode: str) -> tuple[float, int]:
     if mode == "duration":
         console.print("\n[dim]Examples: 30, 30s, 5m, 01:30, 00:05:00[/dim]")
@@ -232,12 +243,67 @@ def source_info_panel(video: Path, info: dict) -> Panel:
     return Panel(table, title="Source Media", border_style="cyan")
 
 
-def split_video(video: Path, total_duration: float, clip_duration: float, parts: int, output_dir: Path) -> None:
+def build_ffmpeg_cmd(
+    video: Path,
+    start: float,
+    duration: float,
+    output_file: Path,
+    method: str = "copy",
+    overwrite: bool = False,
+) -> list[str]:
+    overwrite_flag = "-y" if overwrite else "-n"
+    if method == "copy":
+        return [
+            "ffmpeg", "-hide_banner", "-loglevel", "error", overwrite_flag,
+            "-stats_period", "0.5", "-progress", "pipe:1", "-nostats",
+            "-ss", f"{start:.6f}", "-i", str(video), "-t", f"{duration:.6f}",
+            "-map", "0:v:0?", "-map", "0:a:0?", "-map_metadata", "0",
+            "-c", "copy",
+            str(output_file),
+        ]
+    return [
+        "ffmpeg", "-hide_banner", "-loglevel", "error", overwrite_flag,
+        "-stats_period", "0.5", "-progress", "pipe:1", "-nostats",
+        "-ss", f"{start:.6f}", "-i", str(video), "-t", f"{duration:.6f}",
+        "-map", "0:v:0?", "-map", "0:a:0?", "-map_metadata", "0",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart",
+        str(output_file),
+    ]
+
+
+def split_video(
+    video: Path,
+    total_duration: float,
+    clip_duration: float,
+    parts: int,
+    output_dir: Path,
+    method: str = "copy",
+    overwrite: bool = False,
+) -> None:
     """Split video while parsing FFmpeg -progress output for realtime stats."""
     stem = video.stem
     digits = max(2, len(str(parts)))
     started_at = time.monotonic()
     completed_output_bytes = 0
+    ext = video.suffix if method == "copy" else ".mp4"
+
+    # Pre-check for existing output files to avoid silent accidental overwrites
+    existing_files = [
+        output_dir / f"{stem}_part_{i + 1:0{digits}d}{ext}"
+        for i in range(parts)
+        if (output_dir / f"{stem}_part_{i + 1:0{digits}d}{ext}").exists()
+    ]
+    if existing_files and not overwrite:
+        console.print(Panel(
+            f"[yellow]Warning: {len(existing_files)} output file(s) already exist in:[/yellow]\n{output_dir}\n\n"
+            f"[dim]Example: {existing_files[0].name}[/dim]",
+            title="Existing Files Detected", border_style="yellow",
+        ))
+        if not Confirm.ask("Do you want to overwrite existing files?", default=False):
+            console.print("[yellow]Splitting cancelled to prevent overwriting existing files.[/yellow]")
+            return
+        overwrite = True
 
     progress = Progress(
         TextColumn("[bold cyan]Overall"),
@@ -261,6 +327,7 @@ def split_video(video: Path, total_duration: float, clip_duration: float, parts:
         stat_table.add_column("Metric", style="bold cyan", ratio=1)
         stat_table.add_column("Value", ratio=2)
         stat_table.add_row("Current clip", f"{clip_index} / {parts}")
+        stat_table.add_row("Method", "[green]Stream Copy (Fast)[/green]" if method == "copy" else "[yellow]Re-encode (H.264)[/yellow]")
         stat_table.add_row("Clip progress", f"{format_seconds(clip_processed)} / {format_seconds(current_duration)}")
         stat_table.add_row("Frame", stats.get("frame", "0"))
         stat_table.add_row("FPS", stats.get("fps", "0"))
@@ -284,16 +351,8 @@ def split_video(video: Path, total_duration: float, clip_duration: float, parts:
             continue
 
         current_duration = min(clip_duration, remaining)
-        output_file = output_dir / f"{stem}_part_{i + 1:0{digits}d}.mp4"
-        cmd = [
-            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-            "-stats_period", "0.5", "-progress", "pipe:1", "-nostats",
-            "-ss", f"{start:.6f}", "-i", str(video), "-t", f"{current_duration:.6f}",
-            "-map", "0:v:0?", "-map", "0:a:0?", "-map_metadata", "0",
-            "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-            "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart",
-            str(output_file),
-        ]
+        output_file = output_dir / f"{stem}_part_{i + 1:0{digits}d}{ext}"
+        cmd = build_ffmpeg_cmd(video, start, current_duration, output_file, method=method, overwrite=overwrite)
 
         stats = {"frame": "0", "fps": "0", "speed": "0x", "bitrate": "N/A"}
         clip_processed = 0.0
@@ -342,7 +401,7 @@ def split_video(video: Path, total_duration: float, clip_duration: float, parts:
     progress.update(overall_task, completed=100.0)
 
 
-def show_plan(video: Path, total_duration: float, clip_duration: float, parts: int, output_dir: Path) -> None:
+def show_plan(video: Path, total_duration: float, clip_duration: float, parts: int, output_dir: Path, method: str = "copy") -> None:
     table = Table(box=box.ROUNDED, show_header=False, padding=(0, 1))
     table.add_column("Item", style="bold cyan")
     table.add_column("Value")
@@ -350,7 +409,12 @@ def show_plan(video: Path, total_duration: float, clip_duration: float, parts: i
     table.add_row("Video duration", format_seconds(total_duration))
     table.add_row("Parts", str(parts))
     table.add_row("Approx. clip length", format_seconds(clip_duration))
-    table.add_row("Output format", "MP4 • H.264 video • AAC audio")
+    if method == "copy":
+        table.add_row("Method", "[green]Stream Copy (Fast & Lossless)[/green]")
+        table.add_row("Output format", f"{video.suffix.lstrip('.').upper()} • stream copy")
+    else:
+        table.add_row("Method", "[yellow]Re-encode (Slow & Frame-Accurate)[/yellow]")
+        table.add_row("Output format", "MP4 • H.264 video • AAC audio")
     table.add_row("Output folder", str(output_dir))
     console.print()
     console.print(Panel(table, title="Split Plan", border_style="cyan"))
@@ -400,15 +464,16 @@ def main() -> None:
     console.print(source_info_panel(video, info))
     mode = choose_mode()
     clip_duration, parts = get_split_plan(total_duration, mode)
+    method = choose_processing_method()
     output_dir = safe_output_dir(video)
-    show_plan(video, total_duration, clip_duration, parts, output_dir)
+    show_plan(video, total_duration, clip_duration, parts, output_dir, method=method)
 
     if not Confirm.ask("\nStart splitting?", default=True):
         console.print("[yellow]Cancelled.[/yellow]")
         return
 
     try:
-        split_video(video, total_duration, clip_duration, parts, output_dir)
+        split_video(video, total_duration, clip_duration, parts, output_dir, method=method)
     except RuntimeError as exc:
         console.print(f"[bold red]{exc}[/bold red]")
         sys.exit(1)
