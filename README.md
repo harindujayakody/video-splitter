@@ -96,6 +96,11 @@ python --version
 
 Both `ffmpeg` and `ffprobe` must be available in your system `PATH`.
 
+> FFmpeg is an external system dependency, not a Python package: it is **not**
+> installed by `pip install -r requirements.txt` (which only installs the
+> `rich` terminal UI library). Install it from https://ffmpeg.org/download.html
+> or your OS package manager, then re-run the tool.
+
 Verify with:
 
 ```bash
@@ -232,7 +237,13 @@ These values are reported directly by FFmpeg and may fluctuate depending on the 
 
 ## Output Settings
 
-The video output is optimized for compatibility and quality:
+By default clips use **fast stream copy**: the original video and audio
+codecs are copied untouched, so splitting takes seconds and quality is
+identical to the source. Splits land on keyframes, so cut points may be up
+to a few seconds off the requested time.
+
+Choose **Re-encode H.264 CRF 18** at the prompt when you need frame-accurate
+cuts or a normalised output codec:
 
 ```text
 Container : MP4
@@ -243,7 +254,7 @@ Audio     : AAC
 Audio rate: 192 kbps
 ```
 
-Because clips are re-encoded, split boundaries are typically more precise than stream-copy splitting.
+Because clips are re-encoded in that mode, split boundaries are typically more precise than stream-copy splitting.
 
 ---
 
@@ -261,7 +272,7 @@ Example:
 /output/my_video/my_video_part_01.mp4
 ```
 
-Existing files with the same names are overwritten by FFmpeg.
+Existing files with the same names are **never overwritten silently**: Split Video Pro asks before overwriting each existing clip, and skips it if you decline.
 
 ---
 
@@ -350,3 +361,9 @@ Developed by **Harindu Jayakody**
 **Infiax.com**
 
 https://infiax.com
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE).

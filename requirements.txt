@@ -1,1 +1,3 @@
+# FFmpeg + FFprobe are external system dependencies (see README) — they are
+# NOT Python packages and cannot be installed via pip.
 rich>=13.7.0,<15.0.0
